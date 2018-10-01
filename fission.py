@@ -15,6 +15,7 @@ from tinydb.operations import set
 import socket
 import time
 import os
+import sys
 
 #Set this to your raven-cli program
 cli = "raven-cli"
@@ -165,36 +166,45 @@ def fission(master_address_list, filter):
         print("Fission asset count: " + str(len(assets)))
         for asset, qty in assets.items():
             if not asset.endswith('!'):  #Only send if not admin token
-                address1 = get_others_address(master_address_list)
-                address2 = get_others_address(master_address_list)
-                if (qty > 1):
-                    qty1 = int(qty / 2)
+                if qty > 0:
+                    address1 = get_others_address(master_address_list)
+                    address2 = get_others_address(master_address_list)
+                    if (qty > 1):
+                        qty1 = int(qty / 2)
+                    else:
+                        qty1 = qty
+
+                    qty2 = qty - qty1
+                    print("Transfer " + asset + " Qty:" + str(qty1) + " to " + address1)
+                    try:
+                        txid1 = transfer_asset(asset, qty1, address1)
+                        print("TxId 1: " + txid1)
+                        transferred=transferred+1
+                        print("Asset transfer count: " + str(transferred))
+                    except BaseException as err:
+                        print("Could not send asset " + asset + ". Possibly already sent, waiting for confirmation.")
+                        print(err)
+                    
+                    print("Transfer " + asset + " Qty:" + str(qty2) + " to " + address1)
+                    try:
+                        txid2 = transfer_asset(asset, qty2, address2)
+                        print("TxId 2: " + txid2)
+                        transferred=transferred+1
+                        print("Asset transfer count: " + str(transferred))
+                    except BaseException as err:
+                        print("Could not send asset " + asset + ". Possibly already sent, waiting for confirmation.")
+                        print(err)
+
+                    print("")
                 else:
-                    qty1 = qty
+                    print("No " + asset + " in wallet.")
 
-                qty2 = qty - qty1
-                print("Transfer " + asset + " Qty:" + str(qty1) + " to " + address1)
-                try:
-                    txid1 = transfer_asset(asset, qty1, address1)
-                    print("TxId 1: " + txid1)
-                    transferred=transferred+1
-                    print("Asset transfer count: " + str(transferred))
-                except BaseException as err:
-                    print("Could not send asset " + asset + ". Possibly already sent, waiting for confirmation.")
-                    print(err)
-                
-                print("Transfer " + asset + " Qty:" + str(qty2) + " to " + address1)
-                try:
-                    txid2 = transfer_asset(asset, qty2, address2)
-                    print("TxId 2: " + txid2)
-                    transferred=transferred+1
-                    print("Asset transfer count: " + str(transferred))
-                except BaseException as err:
-                    print("Could not send asset " + asset + ". Possibly already sent, waiting for confirmation.")
-                    print(err)
 
-                print("")
-        time.sleep(60)
+        for t in range(0,20):
+            sys.stdout.write('.')
+            sys.stdout.flush()
+            time.sleep(1)
+        print("")
 
 def hotpotato(master_address_list, filter):
     transferred = 0
@@ -224,5 +234,5 @@ if mode == "-regtest":  #If regtest then mine our own blocks
 
 create_address_file()
 master_list = create_master_list_of_addresses()
-#fission(master_list, "URANIUM")
-hotpotato(master_list, asset)  #Set to "*" for all.
+fission(master_list, "URANIUM")
+#hotpotato(master_list, asset)  #Set to "*" for all.

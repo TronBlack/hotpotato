@@ -185,7 +185,7 @@ def fission(master_address_list, filter):
                         print("Could not send asset " + asset + ". Possibly already sent, waiting for confirmation.")
                         print(err)
                     
-                    print("Transfer " + asset + " Qty:" + str(qty2) + " to " + address1)
+                    print("Transfer " + asset + " Qty:" + str(qty2) + " to " + address2)
                     try:
                         txid2 = transfer_asset(asset, qty2, address2)
                         print("TxId 2: " + txid2)

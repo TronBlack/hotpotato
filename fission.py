@@ -137,8 +137,10 @@ def get_others_address(master_address_list):
         print("You must include address files from other nodes.\nExpected format <ip>"+extension)
         exit(-1)        
 
+    total_addresses = len(master_address_list)
+    selected = random.randint(0, total_addresses-1)
+    print("Choosing address " + str(selected) + " of " + str(total_addresses) + " is " + master_address_list[selected])
     #Choose an address from the master list
-    selected = random.randint(0, len(master_address_list)-1)
     return(master_address_list[selected])
 
 def transfer_asset(asset, qty, address):
